@@ -1,6 +1,6 @@
 {
   "name": "ferd-trivia",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A trivia game built for Ferd bots",
   "main": "trivia.js",
   "dependencies": {

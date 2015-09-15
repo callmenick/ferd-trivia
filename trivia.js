@@ -60,7 +60,7 @@ module.exports = function(ferd) {
     request(url, function (error, responser, body) {
       var result = JSON.parse(body)[0];
       question = result.question;
-      answer = result.answer.replace(/<[^>]*>/g, '').replace(/\\'s/ig, "'");
+      answer = result.answer.replace(/<[^>]*>/g, '').replace(/\\'/ig, "'");
       category = result.category.title;
 
       if(res.message.text !== 'ferd trivia') {

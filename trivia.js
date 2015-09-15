@@ -60,7 +60,7 @@ module.exports = function(ferd) {
     request(url, function (error, responser, body) {
       var result = JSON.parse(body)[0];
       question = result.question;
-      answer = result.answer.replace(/<[^>]*>/g, '').replace(/\\'/ig, "'");
+      answer = result.answer.replace(/<[^>]*>/g, '').replace(/\\'s/ig, "'s");
       category = result.category.title;
 
       if(res.message.text !== 'ferd trivia') {
@@ -87,17 +87,14 @@ module.exports = function(ferd) {
           icon_emoji: ':question:'
         });
 
-        (function() {
-          questionNumber = 1;
-          maxPoints = {user: '', points: 0};
-          answerTest = init;
-          players = {};
-        }());
-
+        questionNumber = 1;
+        maxPoints = {user: '', points: 0};
+        answerTest = init;
+        players = {};
         sender = null;
 
       } else {
-        var text = '*Question #' + questionNumber + '*: \n\n*Category*: ' + category + '\n\n' + question;
+        var text = '*Question #' + questionNumber + '*: \n\n*Hint*: ' + category + '\n\n' + question;
         if(sender) {
           var text = 'Correct! ' + sender.name + ' has earned ' + players[sender.name] + ' points.\n\n' + text;      
         }
@@ -113,6 +110,9 @@ module.exports = function(ferd) {
         var count = 1;
 
         intervalId = setInterval(function() {
+          if(answer[count] === ' ') {
+            count++;
+          }
           var hint = answer.slice(0, count);
           res.postMessage({
             as_user: false,
@@ -120,25 +120,25 @@ module.exports = function(ferd) {
             text: 'Here is a hint: ' + hint,
             icon_emoji: ':question:'
           });
+
           count++;
+
           if(count === answer.length) {
             clearInterval(intervalId);
-            count = 0;
           }
         }, 10000);
-
-        (function() {
-          answerTest = function(a) {
-            console.log('answer ==> ', answer);
-            try {
-              console.log("distance: ", getEditDistance(answer, a));
-              return getEditDistance(answer, a) <= 3;
-            } catch(e) {
-              console.log(e);
-              return false;
-            }
-          };
-        }());
+        
+        answerTest = function(a) {
+          console.log('answer ==> ', answer);
+          try {
+            console.log("distance: ", getEditDistance(answer, a));
+            return getEditDistance(answer, a) <= 3;
+          } catch(e) {
+            console.log(e);
+            return false;
+          }
+        };
+      
       }
     });
 
@@ -164,15 +164,12 @@ module.exports = function(ferd) {
 
   ferd.listen(/trivia quit/i, function(res) {
 
-    (function() {
-      questionNumber = 1;
-      maxPoints = {user: '', points: 0};
-      answerTest = init;
-      players = {};
-    }());
+    questionNumber = 1;
+    maxPoints = {user: '', points: 0};
+    answerTest = init;
+    players = {};
 
     clearInterval(intervalId);
-    count = 0;
 
     res.postMessage({
       as_user: false,

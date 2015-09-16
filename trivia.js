@@ -10,6 +10,7 @@ module.exports = function(ferd) {
   var players = {};
   var intervalId;
   var url = 'http://jservice.io/api/random';
+  var m;
 
   var getEditDistance = function(a, b){
     if(a.length == 0) return b.length; 
@@ -46,6 +47,7 @@ module.exports = function(ferd) {
   };
 
   var sender;
+
   var init = function(theAnswer) {
     return theAnswer.match(new RegExp('ferd trivia', 'i'));
   };
@@ -80,12 +82,7 @@ module.exports = function(ferd) {
 
       if(maxPoints.points >= 5) {
 
-        res.postMessage({
-          as_user: false,
-          username: 'Ferd',
-          text: maxPoints.user + ' has won!',
-          icon_emoji: ':question:'
-        });
+        res.send(maxPoints.user + ' has won!');
 
         questionNumber = 1;
         maxPoints = {user: '', points: 0};
@@ -99,12 +96,7 @@ module.exports = function(ferd) {
           var text = 'Correct! ' + sender.name + ' has earned ' + players[sender.name] + ' points.\n\n' + text;      
         }
 
-        res.postMessage({
-          as_user: false,
-          username: 'Ferd',
-          text: text,
-          icon_emoji: ':question:'
-        });
+        res.send(text);
       
         questionNumber++;
         var count = 1;
@@ -114,12 +106,12 @@ module.exports = function(ferd) {
             count++;
           }
           var hint = answer.slice(0, count);
-          res.postMessage({
-            as_user: false,
-            username: 'Ferd',
-            text: 'Here is a hint: ' + hint,
-            icon_emoji: ':question:'
-          });
+
+          if(count === 1) {
+            m = res.send('Here is a hint: ' + hint);
+          } else {
+            res.updateMessage(m, 'Here is a hint: ' + hint);
+          }
 
           count++;
 
@@ -134,7 +126,7 @@ module.exports = function(ferd) {
             console.log("distance: ", getEditDistance(answer, a));
             return getEditDistance(answer, a) <= 3;
           } catch(e) {
-            console.log(e);
+            // console.log('error: ',e);
             return false;
           }
         };
@@ -155,10 +147,8 @@ module.exports = function(ferd) {
     }
 
     res.postMessage({
-      as_user: false,
-      username: 'Ferd',
-      attachments: scores,
-      icon_emoji: ':question:'
+      as_user: true,
+      attachments: scores
     });
   });
 
@@ -171,12 +161,7 @@ module.exports = function(ferd) {
 
     clearInterval(intervalId);
 
-    res.postMessage({
-      as_user: false,
-      username: 'Ferd',
-      text: 'Thanks for playing!',
-      icon_emoji: ':question:'
-    });
+    res.send('Thanks for playing!');
   });
 
 };

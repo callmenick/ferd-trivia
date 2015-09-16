@@ -63,7 +63,7 @@ module.exports = function(ferd) {
       answer = result.answer.replace(/<[^>]*>/g, '').replace(/\\'s/ig, "'s");
       category = result.category.title;
 
-      if(res.message.text !== 'ferd trivia') {
+      if(res.incomingMessage.text !== 'ferd trivia') {
         sender = res.getMessageSender();
 
         if(players[sender.name]) {

@@ -91,46 +91,49 @@ module.exports = function(ferd) {
         sender = null;
 
       } else {
-        var text = '*Question #' + questionNumber + '*: \n\n*Hint*: ' + category + '\n\n' + question;
+        var text = '> *Question #' + questionNumber + '*: \n\n'
+                 + '> *Hint*: ' + category + '\n\n'
+                 + '> ' + question;
         if(sender) {
           var text = 'Correct! ' + sender.name + ' has earned ' + players[sender.name] + ' points.\n\n' + text;      
         }
 
-        res.send(text);
-      
-        questionNumber++;
-        var count = 1;
+        setTimeout(function(){
+          res.send(text);
+          
+          questionNumber++;
+          
+          answerTest = function(a) {
+            try {
+              return getEditDistance(answer, a) <= 3;
+            } catch(e) {
+              // console.log('error: ',e);
+              return false;
+            }
+          };
 
-        intervalId = setInterval(function() {
-          if(answer[count] === ' ') {
+          var count = 1;
+          intervalId = setInterval(function() {
+            if(answer[count] === ' ') {
+              count++;
+            }
+            var hint = answer.slice(0, count);
+
+            if(count === 1) {
+              m = res.send('Here is a hint: ' + hint);
+            } else {
+              res.updateMessage(m, 'Here is a hint: ' + hint);
+            }
+
             count++;
-          }
-          var hint = answer.slice(0, count);
 
-          if(count === 1) {
-            m = res.send('Here is a hint: ' + hint);
-          } else {
-            res.updateMessage(m, 'Here is a hint: ' + hint);
-          }
+            if(count === answer.length) {
+              clearInterval(intervalId);
+            }
+          }, 10000);
+          
+        }, 500);
 
-          count++;
-
-          if(count === answer.length) {
-            clearInterval(intervalId);
-          }
-        }, 10000);
-        
-        answerTest = function(a) {
-          console.log('answer ==> ', answer);
-          try {
-            console.log("distance: ", getEditDistance(answer, a));
-            return getEditDistance(answer, a) <= 3;
-          } catch(e) {
-            // console.log('error: ',e);
-            return false;
-          }
-        };
-      
       }
     });
 
@@ -158,6 +161,8 @@ module.exports = function(ferd) {
     maxPoints = {user: '', points: 0};
     answerTest = init;
     players = {};
+    sender = null;
+
 
     clearInterval(intervalId);
 
